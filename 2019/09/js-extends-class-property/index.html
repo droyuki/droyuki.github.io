@@ -1,6 +1,6 @@
 <!doctype html><html lang=zh-tw><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><title>JS 繼承(1): class property跑去哪了？ - weichen's note</title><meta name=Description content="just some tech notes."><script async src="https://www.googletagmanager.com/gtag/js?id=G-4FB17VHDQ7"></script>
-<script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4FB17VHDQ7",{anonymize_ip:!1})}</script><meta name=keywords content="js"><meta property="og:title" content="JS 繼承(1): class property跑去哪了？"><meta property="og:description" content="探討 JS 繼承的 class property 行為 Class A extends Component 1 2 3 4 5 6 7 8 9 10 11 12 class A extends Component { static color = &#34;red&#34;; counter = 0; arrowOnClick = () => { console.log(&#34;A arrowOnClick&#34;); } onClick(){ console.log(&#34;A onClick&#34;); } } 經由 Babel 轉譯後，class properties 都會被移到 constructor"><meta property="og:type" content="article"><meta property="og:url" content="https://droyuki.github.io/2019/09/js-extends-class-property/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2019-09-03T16:57:11+08:00"><meta property="article:modified_time" content="2023-05-24T22:54:26+08:00"><meta property="og:site_name" content="weichen's note"><meta name=twitter:card content="summary"><meta name=twitter:title content="JS 繼承(1): class property跑去哪了？"><meta name=twitter:description content="探討 JS 繼承的 class property 行為 Class A extends Component 1 2 3 4 5 6 7 8 9 10 11 12 class A extends Component { static color = &#34;red&#34;; counter = 0; arrowOnClick = () => { console.log(&#34;A arrowOnClick&#34;); } onClick(){ console.log(&#34;A onClick&#34;); } } 經由 Babel 轉譯後，class properties 都會被移到 constructor"><meta name=application-name content="My cool site"><meta name=apple-mobile-web-app-title content="My cool site"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5152060720937345" crossorigin=anonymous></script><link rel="shortcut icon" type=image/x-icon href=/favicon.ico>
-<link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://droyuki.github.io/2019/09/js-extends-class-property/><link rel=prev href=https://droyuki.github.io/2019/05/react-bind-this/><link rel=next href=https://droyuki.github.io/2019/09/js-extends-constructor/><link rel=stylesheet href=/css/style.min.css><link rel=preload href=https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css></noscript><link rel=preload href=https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css></noscript><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"JS 繼承(1): class property跑去哪了？","inLanguage":"zh-TW","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/droyuki.github.io\/2019\/09\/js-extends-class-property\/"},"genre":"posts","keywords":"js","wordcount":346,"url":"https:\/\/droyuki.github.io\/2019\/09\/js-extends-class-property\/","datePublished":"2019-09-03T16:57:11+08:00","dateModified":"2023-05-24T22:54:26+08:00","publisher":{"@type":"Organization","name":""},"author":{"@type":"Person","name":"weichen"},"description":""}</script></head><body data-header-desktop=fixed data-header-mobile=auto><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><div class=header-title><a href=/ title="weichen's note">weichen's note</a></div><div class=menu><div class=menu-inner><a class=menu-item href=/posts/>所有文章 </a><a class=menu-item href=/tags/>標籤 </a><a class=menu-item href=/categories/>分類 </a><a class=menu-item href=https://github.com/droyuki rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw' aria-hidden=true></i> </a><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4FB17VHDQ7",{anonymize_ip:!1})}</script><meta name=keywords content="js"><meta property="og:title" content="JS 繼承(1): class property跑去哪了？"><meta property="og:description" content="探討 JS 繼承的 class property 行為 Class A extends Component 1 2 3 4 5 6 7 8 9 10 11 12 class A extends Component { static color = &#34;red&#34;; counter = 0; arrowOnClick = () => { console.log(&#34;A arrowOnClick&#34;); } onClick(){ console.log(&#34;A onClick&#34;); } } 經由 Babel 轉譯後，class properties 都會被移到 constructor"><meta property="og:type" content="article"><meta property="og:url" content="https://droyuki.github.io/2019/09/js-extends-class-property/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2019-09-03T16:57:11+08:00"><meta property="article:modified_time" content="2023-05-25T00:39:24+08:00"><meta property="og:site_name" content="weichen's note"><meta name=twitter:card content="summary"><meta name=twitter:title content="JS 繼承(1): class property跑去哪了？"><meta name=twitter:description content="探討 JS 繼承的 class property 行為 Class A extends Component 1 2 3 4 5 6 7 8 9 10 11 12 class A extends Component { static color = &#34;red&#34;; counter = 0; arrowOnClick = () => { console.log(&#34;A arrowOnClick&#34;); } onClick(){ console.log(&#34;A onClick&#34;); } } 經由 Babel 轉譯後，class properties 都會被移到 constructor"><meta name=application-name content="My cool site"><meta name=apple-mobile-web-app-title content="My cool site"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5152060720937345" crossorigin=anonymous></script><link rel="shortcut icon" type=image/x-icon href=/favicon.ico>
+<link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://droyuki.github.io/2019/09/js-extends-class-property/><link rel=prev href=https://droyuki.github.io/2019/05/react-bind-this/><link rel=next href=https://droyuki.github.io/2019/09/js-extends-constructor/><link rel=stylesheet href=/css/style.min.css><link rel=preload href=https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css></noscript><link rel=preload href=https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css></noscript><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"JS 繼承(1): class property跑去哪了？","inLanguage":"zh-TW","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/droyuki.github.io\/2019\/09\/js-extends-class-property\/"},"genre":"posts","keywords":"js","wordcount":346,"url":"https:\/\/droyuki.github.io\/2019\/09\/js-extends-class-property\/","datePublished":"2019-09-03T16:57:11+08:00","dateModified":"2023-05-25T00:39:24+08:00","publisher":{"@type":"Organization","name":""},"author":{"@type":"Person","name":"weichen"},"description":""}</script></head><body data-header-desktop=fixed data-header-mobile=auto><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><div class=header-title><a href=/ title="weichen's note">weichen's note</a></div><div class=menu><div class=menu-inner><a class=menu-item href=/posts/>所有文章 </a><a class=menu-item href=/tags/>標籤 </a><a class=menu-item href=/categories/>分類 </a><a class=menu-item href=https://github.com/droyuki rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw' aria-hidden=true></i> </a><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
 <input type=text placeholder=搜索文章標題或內容... id=search-input-desktop>
 <a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
 <a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
@@ -15,152 +15,152 @@
 </a><a href=javascript:void(0); class=menu-item title=選擇語言><i class="fa fa-globe fa-fw" aria-hidden=true></i>
 <select class=language-select onchange="location=this.value"><option value=/2019/09/js-extends-class-property/ selected>繁體中文</option></select></a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><h2 class=toc-title>目錄</h2><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">JS 繼承(1): class property跑去哪了？</h1><div class=post-meta><div class=post-meta-line><span class=post-author><a href=/ title=Author rel=author class=author><i class="fas fa-user-circle fa-fw" aria-hidden=true></i>weichen</a></span>&nbsp;<span class=post-category>收錄於 <a href=/categories/frontend/><i class="far fa-folder fa-fw" aria-hidden=true></i>frontend</a></span></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw" aria-hidden=true></i>&nbsp;<time datetime=2019-09-03>2019-09-03</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden=true></i>&nbsp;約 346 字&nbsp;
 <i class="far fa-clock fa-fw" aria-hidden=true></i>&nbsp;預計閱讀 1 分鐘&nbsp;</div></div><div class="details toc" id=toc-static data-kept><div class="details-summary toc-title"><span>目錄</span>
-<span><i class="details-icon fas fa-angle-right" aria-hidden=true></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#探討-js-繼承的-class-property-行為>探討 JS 繼承的 class property 行為</a><ul><li><a href=#class-a-extends-component>Class A extends Component</a></li><li><a href=#多重繼承>多重繼承</a></li></ul></li></ul></nav></div></div><div class=content id=content><h2 id=探討-js-繼承的-class-property-行為>探討 JS 繼承的 class property 行為</h2><h3 id=class-a-extends-component>Class A extends Component</h3><div class=highlight><div style=color:#b0c4de;background-color:#282c34;-moz-tab-size:2;-o-tab-size:2;tab-size:2><table style=border-spacing:0;padding:0;margin:0;border:0><tr><td style=vertical-align:top;padding:0;margin:0;border:0><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:2;-o-tab-size:2;tab-size:2><code><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-1><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-1> 1</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-2><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-2> 2</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-3><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-3> 3</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-4><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-4> 4</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-5><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-5> 5</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-6><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-6> 6</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-7><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-7> 7</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-8><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-8> 8</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-9><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-9> 9</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-10><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-10>10</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-11><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-11>11</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-0-12><a style=outline:none;text-decoration:none;color:inherit href=#hl-0-12>12</a>
-</span></code></pre></td><td style=vertical-align:top;padding:0;margin:0;border:0;width:100%><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:2;-o-tab-size:2;tab-size:2><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#76a9f9>class</span> <span style=color:#aa89ea>A</span> <span style=color:#76a9f9>extends</span> <span style=color:#aa89ea>Component</span> <span style=color:#abb2bf>{</span>
-</span></span><span style=display:flex><span>  <span style=color:#76a9f9>static</span> <span style=color:#aa89ea>color</span> <span style=color:#54b1c7>=</span> <span style=color:#63c381>&#34;red&#34;</span><span style=color:#abb2bf>;</span>
-</span></span><span style=display:flex><span>  <span style=color:#aa89ea>counter</span> <span style=color:#54b1c7>=</span> <span style=color:#d19a66>0</span><span style=color:#abb2bf>;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#aa89ea>arrowOnClick</span> <span style=color:#54b1c7>=</span> <span style=color:#abb2bf>()</span> <span style=color:#abb2bf>=&gt;</span> <span style=color:#abb2bf>{</span>
-</span></span><span style=display:flex><span>    <span style=color:#aa89ea>console</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>log</span><span style=color:#abb2bf>(</span><span style=color:#63c381>&#34;A arrowOnClick&#34;</span><span style=color:#abb2bf>);</span>
-</span></span><span style=display:flex><span>  <span style=color:#abb2bf>}</span>
-</span></span><span style=display:flex><span>  
-</span></span><span style=display:flex><span>  <span style=color:#aa89ea>onClick</span><span style=color:#abb2bf>(){</span>
-</span></span><span style=display:flex><span>    <span style=color:#aa89ea>console</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>log</span><span style=color:#abb2bf>(</span><span style=color:#63c381>&#34;A onClick&#34;</span><span style=color:#abb2bf>);</span>
-</span></span><span style=display:flex><span>  <span style=color:#abb2bf>}</span>
-</span></span><span style=display:flex><span><span style=color:#abb2bf>}</span>
-</span></span></code></pre></td></tr></table></div></div><p>經由 Babel 轉譯後，class properties 都會被移到 constructor 內</p><div class=highlight><div style=color:#b0c4de;background-color:#282c34;-moz-tab-size:2;-o-tab-size:2;tab-size:2><table style=border-spacing:0;padding:0;margin:0;border:0><tr><td style=vertical-align:top;padding:0;margin:0;border:0><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:2;-o-tab-size:2;tab-size:2><code><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-1><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-1> 1</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-2><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-2> 2</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-3><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-3> 3</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-4><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-4> 4</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-5><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-5> 5</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-6><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-6> 6</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-7><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-7> 7</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-8><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-8> 8</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-9><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-9> 9</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-10><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-10>10</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-11><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-11>11</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-12><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-12>12</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-13><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-13>13</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-1-14><a style=outline:none;text-decoration:none;color:inherit href=#hl-1-14>14</a>
-</span></code></pre></td><td style=vertical-align:top;padding:0;margin:0;border:0;width:100%><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:2;-o-tab-size:2;tab-size:2><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>/* --- After Babel --- */</span>
-</span></span><span style=display:flex><span><span style=color:#76a9f9>class</span> <span style=color:#aa89ea>A</span> <span style=color:#abb2bf>{</span>
-</span></span><span style=display:flex><span>  <span style=color:#aa89ea>constructor</span><span style=color:#abb2bf>()</span> <span style=color:#abb2bf>{</span>
-</span></span><span style=display:flex><span>    <span style=color:#8a93a5;font-style:italic>// class properties 都會被移到 constructor 內
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic></span>    <span style=color:#76a9f9>this</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>counter</span> <span style=color:#54b1c7>=</span> <span style=color:#d19a66>0</span><span style=color:#abb2bf>;</span>
-</span></span><span style=display:flex><span>    <span style=color:#76a9f9>this</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>arrowOnClick</span> <span style=color:#54b1c7>=</span> <span style=color:#abb2bf>()</span> <span style=color:#abb2bf>=&gt;</span> <span style=color:#abb2bf>{};</span>
-</span></span><span style=display:flex><span>  <span style=color:#abb2bf>}</span> 
-</span></span><span style=display:flex><span>  <span style=color:#aa89ea>onClick</span><span style=color:#abb2bf>()</span> <span style=color:#abb2bf>{}</span>
-</span></span><span style=display:flex><span><span style=color:#abb2bf>}</span>
-</span></span><span style=display:flex><span><span style=color:#aa89ea>A</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>color</span> <span style=color:#54b1c7>=</span> <span style=color:#63c381>&#34;red&#34;</span><span style=color:#abb2bf>;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#aa89ea>console</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>log</span><span style=color:#abb2bf>(</span><span style=color:#aa89ea>A</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>prototype</span><span style=color:#abb2bf>);</span> 
-</span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>// Console output: {constructor: ƒ, onClick: ƒ}
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>// 因尚未實例化，因為沒跑constructor，所以看不到 class properties !
-</span></span></span></code></pre></td></tr></table></div></div><h3 id=多重繼承>多重繼承</h3><div class=highlight><div style=color:#b0c4de;background-color:#282c34;-moz-tab-size:2;-o-tab-size:2;tab-size:2><table style=border-spacing:0;padding:0;margin:0;border:0><tr><td style=vertical-align:top;padding:0;margin:0;border:0><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:2;-o-tab-size:2;tab-size:2><code><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-1><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-1> 1</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-2><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-2> 2</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-3><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-3> 3</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-4><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-4> 4</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-5><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-5> 5</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-6><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-6> 6</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-7><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-7> 7</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-8><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-8> 8</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-9><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-9> 9</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-10><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-10>10</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-11><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-11>11</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-12><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-12>12</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-13><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-13>13</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-14><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-14>14</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-15><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-15>15</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-16><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-16>16</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-17><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-17>17</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-18><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-18>18</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-19><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-19>19</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-20><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-20>20</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-21><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-21>21</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-22><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-22>22</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-23><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-23>23</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-24><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-24>24</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-25><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-25>25</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-26><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-26>26</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-27><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-27>27</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-28><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-28>28</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-29><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-29>29</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-30><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-30>30</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-31><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-31>31</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-32><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-32>32</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-33><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-33>33</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-34><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-34>34</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-35><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-35>35</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-36><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-36>36</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-37><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-37>37</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-38><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-38>38</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-39><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-39>39</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-40><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-40>40</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-41><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-41>41</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-42><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-42>42</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-43><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-43>43</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-44><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-44>44</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-45><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-45>45</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-46><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-46>46</a>
-</span><span style="white-space:pre;user-select:none;margin-right:.4em;padding:0 .4em;color:#58626f" id=hl-2-47><a style=outline:none;text-decoration:none;color:inherit href=#hl-2-47>47</a>
-</span></code></pre></td><td style=vertical-align:top;padding:0;margin:0;border:0;width:100%><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:2;-o-tab-size:2;tab-size:2><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#76a9f9>class</span> <span style=color:#aa89ea>B</span> <span style=color:#76a9f9>extends</span> <span style=color:#aa89ea>A</span> <span style=color:#abb2bf>{</span>
-</span></span><span style=display:flex><span>  <span style=color:#aa89ea>arrowOnClick</span> <span style=color:#54b1c7>=</span> <span style=color:#abb2bf>()</span> <span style=color:#abb2bf>=&gt;</span> <span style=color:#abb2bf>{</span>
-</span></span><span style=display:flex><span>    <span style=color:#76a9f9>super</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>arrowOnClick</span><span style=color:#abb2bf>();</span> <span style=color:#8a93a5;font-style:italic>// error occurred !!
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic></span>    <span style=color:#aa89ea>console</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>log</span><span style=color:#abb2bf>(</span><span style=color:#63c381>&#34;B arrowOnClick&#34;</span><span style=color:#abb2bf>);</span>
-</span></span><span style=display:flex><span>  <span style=color:#abb2bf>}</span>
-</span></span><span style=display:flex><span>  
-</span></span><span style=display:flex><span>  <span style=color:#aa89ea>onClick</span><span style=color:#abb2bf>(){</span>
-</span></span><span style=display:flex><span>    <span style=color:#76a9f9>super</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>onClick</span><span style=color:#abb2bf>();</span>
-</span></span><span style=display:flex><span>    <span style=color:#aa89ea>console</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>log</span><span style=color:#abb2bf>(</span><span style=color:#63c381>&#34;B onClick&#34;</span><span style=color:#abb2bf>);</span>
-</span></span><span style=display:flex><span>  <span style=color:#abb2bf>}</span>
-</span></span><span style=display:flex><span><span style=color:#abb2bf>}</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#aa89ea>console</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>log</span><span style=color:#abb2bf>(</span><span style=color:#aa89ea>B</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>prototype</span><span style=color:#abb2bf>);</span> <span style=color:#8a93a5;font-style:italic>//B extends A, we get prototype of a
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>// A {constructor: ƒ, onClick: ƒ}
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic></span>
-</span></span><span style=display:flex><span><span style=color:#aa89ea>console</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>log</span><span style=color:#abb2bf>(</span><span style=color:#aa89ea>B</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>prototype</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>__proto__</span><span style=color:#abb2bf>);</span>
-</span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>// {constructor: ƒ, onClick: ƒ}
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic></span>
-</span></span><span style=display:flex><span><span style=color:#76a9f9>new</span> <span style=color:#aa89ea>B</span><span style=color:#abb2bf>().</span><span style=color:#aa89ea>arrowOnClick</span><span style=color:#abb2bf>();</span> <span style=color:#8a93a5;font-style:italic>//error occurred!
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic></span><span style=color:#76a9f9>new</span> <span style=color:#aa89ea>B</span><span style=color:#abb2bf>().</span><span style=color:#aa89ea>onClick</span><span style=color:#abb2bf>();</span>
-</span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>/*
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>--- console output ---
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>A onClick (from line 8)
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>B onClick (from line 9)
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>*/</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#76a9f9>class</span> <span style=color:#aa89ea>C</span> <span style=color:#76a9f9>extends</span> <span style=color:#aa89ea>A</span> <span style=color:#abb2bf>{</span>
-</span></span><span style=display:flex><span>  <span style=color:#aa89ea>arrowOnClick</span><span style=color:#abb2bf>()</span> <span style=color:#abb2bf>{</span> <span style=color:#8a93a5;font-style:italic>// never called!
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic></span>    <span style=color:#76a9f9>super</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>onClick</span><span style=color:#abb2bf>();</span> 
-</span></span><span style=display:flex><span>    <span style=color:#aa89ea>console</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>log</span><span style=color:#abb2bf>(</span><span style=color:#63c381>&#34;C onClick&#34;</span><span style=color:#abb2bf>);</span>
-</span></span><span style=display:flex><span>  <span style=color:#abb2bf>}</span>
-</span></span><span style=display:flex><span><span style=color:#abb2bf>}</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#aa89ea>console</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>log</span><span style=color:#abb2bf>(</span><span style=color:#aa89ea>C</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>prototype</span><span style=color:#abb2bf>);</span>
-</span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>// A {constructor: ƒ, arrowOnClick: ƒ}
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic></span>
-</span></span><span style=display:flex><span><span style=color:#aa89ea>console</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>log</span><span style=color:#abb2bf>(</span><span style=color:#aa89ea>C</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>prototype</span><span style=color:#abb2bf>.</span><span style=color:#aa89ea>__proto__</span><span style=color:#abb2bf>);</span>
-</span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>// {constructor: ƒ, onClick: ƒ}
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic></span>
-</span></span><span style=display:flex><span><span style=color:#76a9f9>new</span> <span style=color:#aa89ea>C</span><span style=color:#abb2bf>().</span><span style=color:#aa89ea>arrowOnClick</span><span style=color:#abb2bf>();</span> <span style=color:#8a93a5;font-style:italic>//&#39;new C()&#39; 會執行 A 的 constructor !
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>// A arrowOnClick
-</span></span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic></span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#76a9f9>class</span> <span style=color:#aa89ea>D</span> <span style=color:#76a9f9>extends</span> <span style=color:#aa89ea>A</span> <span style=color:#abb2bf>{}</span> 
-</span></span><span style=display:flex><span><span style=color:#76a9f9>new</span> <span style=color:#aa89ea>D</span><span style=color:#abb2bf>().</span><span style=color:#aa89ea>arrowOnClick</span><span style=color:#abb2bf>();</span>
-</span></span><span style=display:flex><span><span style=color:#8a93a5;font-style:italic>// A arrowOnClick
-</span></span></span></code></pre></td></tr></table></div></div><p>記錄一下。</p></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新於 2023-05-24</span></div></div><div class=post-info-line><div class=post-info-md></div><div class=post-info-share><span><a href=javascript:void(0); title="分享到 Twitter" data-sharer=twitter data-url=https://droyuki.github.io/2019/09/js-extends-class-property/ data-title="JS 繼承(1): class property跑去哪了？" data-hashtags=js><i class="fab fa-twitter fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Facebook" data-sharer=facebook data-url=https://droyuki.github.io/2019/09/js-extends-class-property/ data-hashtag=js><i class="fab fa-facebook-square fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Linkedin" data-sharer=linkedin data-url=https://droyuki.github.io/2019/09/js-extends-class-property/><i class="fab fa-linkedin fa-fw" aria-hidden=true></i></a></span></div></div></div><div class=post-info-more><section class=post-tags><i class="fas fa-tags fa-fw" aria-hidden=true></i>&nbsp;<a href=/tags/js/>js</a></section><section><span><a href=javascript:void(0); onclick=window.history.back()>返回</a></span>&nbsp;|&nbsp;<span><a href=/>主頁</a></span></section></div><div class=post-nav><a href=/2019/05/react-bind-this/ class=prev rel=prev title="React.js 到底要在哪 bind this ?"><i class="fas fa-angle-left fa-fw" aria-hidden=true></i>React.js 到底要在哪 bind this ?</a>
+<span><i class="details-icon fas fa-angle-right" aria-hidden=true></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#探討-js-繼承的-class-property-行為>探討 JS 繼承的 class property 行為</a><ul><li><a href=#class-a-extends-component>Class A extends Component</a></li><li><a href=#多重繼承>多重繼承</a></li></ul></li></ul></nav></div></div><div class=content id=content><h2 id=探討-js-繼承的-class-property-行為>探討 JS 繼承的 class property 行為</h2><h3 id=class-a-extends-component>Class A extends Component</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt id=hl-0-1><a class=lnlinks href=#hl-0-1> 1</a>
+</span><span class=lnt id=hl-0-2><a class=lnlinks href=#hl-0-2> 2</a>
+</span><span class=lnt id=hl-0-3><a class=lnlinks href=#hl-0-3> 3</a>
+</span><span class=lnt id=hl-0-4><a class=lnlinks href=#hl-0-4> 4</a>
+</span><span class=lnt id=hl-0-5><a class=lnlinks href=#hl-0-5> 5</a>
+</span><span class=lnt id=hl-0-6><a class=lnlinks href=#hl-0-6> 6</a>
+</span><span class=lnt id=hl-0-7><a class=lnlinks href=#hl-0-7> 7</a>
+</span><span class=lnt id=hl-0-8><a class=lnlinks href=#hl-0-8> 8</a>
+</span><span class=lnt id=hl-0-9><a class=lnlinks href=#hl-0-9> 9</a>
+</span><span class=lnt id=hl-0-10><a class=lnlinks href=#hl-0-10>10</a>
+</span><span class=lnt id=hl-0-11><a class=lnlinks href=#hl-0-11>11</a>
+</span><span class=lnt id=hl-0-12><a class=lnlinks href=#hl-0-12>12</a>
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-js data-lang=js><span class=line><span class=cl><span class=kr>class</span> <span class=nx>A</span> <span class=kr>extends</span> <span class=nx>Component</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kr>static</span> <span class=nx>color</span> <span class=o>=</span> <span class=s2>&#34;red&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nx>counter</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nx>arrowOnClick</span> <span class=o>=</span> <span class=p>()</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s2>&#34;A arrowOnClick&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  <span class=nx>onClick</span><span class=p>(){</span>
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s2>&#34;A onClick&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>經由 Babel 轉譯後，class properties 都會被移到 constructor 內</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt id=hl-1-1><a class=lnlinks href=#hl-1-1> 1</a>
+</span><span class=lnt id=hl-1-2><a class=lnlinks href=#hl-1-2> 2</a>
+</span><span class=lnt id=hl-1-3><a class=lnlinks href=#hl-1-3> 3</a>
+</span><span class=lnt id=hl-1-4><a class=lnlinks href=#hl-1-4> 4</a>
+</span><span class=lnt id=hl-1-5><a class=lnlinks href=#hl-1-5> 5</a>
+</span><span class=lnt id=hl-1-6><a class=lnlinks href=#hl-1-6> 6</a>
+</span><span class=lnt id=hl-1-7><a class=lnlinks href=#hl-1-7> 7</a>
+</span><span class=lnt id=hl-1-8><a class=lnlinks href=#hl-1-8> 8</a>
+</span><span class=lnt id=hl-1-9><a class=lnlinks href=#hl-1-9> 9</a>
+</span><span class=lnt id=hl-1-10><a class=lnlinks href=#hl-1-10>10</a>
+</span><span class=lnt id=hl-1-11><a class=lnlinks href=#hl-1-11>11</a>
+</span><span class=lnt id=hl-1-12><a class=lnlinks href=#hl-1-12>12</a>
+</span><span class=lnt id=hl-1-13><a class=lnlinks href=#hl-1-13>13</a>
+</span><span class=lnt id=hl-1-14><a class=lnlinks href=#hl-1-14>14</a>
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-js data-lang=js><span class=line><span class=cl><span class=cm>/* --- After Babel --- */</span>
+</span></span><span class=line><span class=cl><span class=kr>class</span> <span class=nx>A</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nx>constructor</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// class properties 都會被移到 constructor 內
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>this</span><span class=p>.</span><span class=nx>counter</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>this</span><span class=p>.</span><span class=nx>arrowOnClick</span> <span class=o>=</span> <span class=p>()</span> <span class=p>=&gt;</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span> 
+</span></span><span class=line><span class=cl>  <span class=nx>onClick</span><span class=p>()</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=nx>A</span><span class=p>.</span><span class=nx>color</span> <span class=o>=</span> <span class=s2>&#34;red&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>A</span><span class=p>.</span><span class=nx>prototype</span><span class=p>);</span> 
+</span></span><span class=line><span class=cl><span class=c1>// Console output: {constructor: ƒ, onClick: ƒ}
+</span></span></span><span class=line><span class=cl><span class=c1>// 因尚未實例化，因為沒跑constructor，所以看不到 class properties !
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=多重繼承>多重繼承</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt id=hl-2-1><a class=lnlinks href=#hl-2-1> 1</a>
+</span><span class=lnt id=hl-2-2><a class=lnlinks href=#hl-2-2> 2</a>
+</span><span class=lnt id=hl-2-3><a class=lnlinks href=#hl-2-3> 3</a>
+</span><span class=lnt id=hl-2-4><a class=lnlinks href=#hl-2-4> 4</a>
+</span><span class=lnt id=hl-2-5><a class=lnlinks href=#hl-2-5> 5</a>
+</span><span class=lnt id=hl-2-6><a class=lnlinks href=#hl-2-6> 6</a>
+</span><span class=lnt id=hl-2-7><a class=lnlinks href=#hl-2-7> 7</a>
+</span><span class=lnt id=hl-2-8><a class=lnlinks href=#hl-2-8> 8</a>
+</span><span class=lnt id=hl-2-9><a class=lnlinks href=#hl-2-9> 9</a>
+</span><span class=lnt id=hl-2-10><a class=lnlinks href=#hl-2-10>10</a>
+</span><span class=lnt id=hl-2-11><a class=lnlinks href=#hl-2-11>11</a>
+</span><span class=lnt id=hl-2-12><a class=lnlinks href=#hl-2-12>12</a>
+</span><span class=lnt id=hl-2-13><a class=lnlinks href=#hl-2-13>13</a>
+</span><span class=lnt id=hl-2-14><a class=lnlinks href=#hl-2-14>14</a>
+</span><span class=lnt id=hl-2-15><a class=lnlinks href=#hl-2-15>15</a>
+</span><span class=lnt id=hl-2-16><a class=lnlinks href=#hl-2-16>16</a>
+</span><span class=lnt id=hl-2-17><a class=lnlinks href=#hl-2-17>17</a>
+</span><span class=lnt id=hl-2-18><a class=lnlinks href=#hl-2-18>18</a>
+</span><span class=lnt id=hl-2-19><a class=lnlinks href=#hl-2-19>19</a>
+</span><span class=lnt id=hl-2-20><a class=lnlinks href=#hl-2-20>20</a>
+</span><span class=lnt id=hl-2-21><a class=lnlinks href=#hl-2-21>21</a>
+</span><span class=lnt id=hl-2-22><a class=lnlinks href=#hl-2-22>22</a>
+</span><span class=lnt id=hl-2-23><a class=lnlinks href=#hl-2-23>23</a>
+</span><span class=lnt id=hl-2-24><a class=lnlinks href=#hl-2-24>24</a>
+</span><span class=lnt id=hl-2-25><a class=lnlinks href=#hl-2-25>25</a>
+</span><span class=lnt id=hl-2-26><a class=lnlinks href=#hl-2-26>26</a>
+</span><span class=lnt id=hl-2-27><a class=lnlinks href=#hl-2-27>27</a>
+</span><span class=lnt id=hl-2-28><a class=lnlinks href=#hl-2-28>28</a>
+</span><span class=lnt id=hl-2-29><a class=lnlinks href=#hl-2-29>29</a>
+</span><span class=lnt id=hl-2-30><a class=lnlinks href=#hl-2-30>30</a>
+</span><span class=lnt id=hl-2-31><a class=lnlinks href=#hl-2-31>31</a>
+</span><span class=lnt id=hl-2-32><a class=lnlinks href=#hl-2-32>32</a>
+</span><span class=lnt id=hl-2-33><a class=lnlinks href=#hl-2-33>33</a>
+</span><span class=lnt id=hl-2-34><a class=lnlinks href=#hl-2-34>34</a>
+</span><span class=lnt id=hl-2-35><a class=lnlinks href=#hl-2-35>35</a>
+</span><span class=lnt id=hl-2-36><a class=lnlinks href=#hl-2-36>36</a>
+</span><span class=lnt id=hl-2-37><a class=lnlinks href=#hl-2-37>37</a>
+</span><span class=lnt id=hl-2-38><a class=lnlinks href=#hl-2-38>38</a>
+</span><span class=lnt id=hl-2-39><a class=lnlinks href=#hl-2-39>39</a>
+</span><span class=lnt id=hl-2-40><a class=lnlinks href=#hl-2-40>40</a>
+</span><span class=lnt id=hl-2-41><a class=lnlinks href=#hl-2-41>41</a>
+</span><span class=lnt id=hl-2-42><a class=lnlinks href=#hl-2-42>42</a>
+</span><span class=lnt id=hl-2-43><a class=lnlinks href=#hl-2-43>43</a>
+</span><span class=lnt id=hl-2-44><a class=lnlinks href=#hl-2-44>44</a>
+</span><span class=lnt id=hl-2-45><a class=lnlinks href=#hl-2-45>45</a>
+</span><span class=lnt id=hl-2-46><a class=lnlinks href=#hl-2-46>46</a>
+</span><span class=lnt id=hl-2-47><a class=lnlinks href=#hl-2-47>47</a>
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-js data-lang=js><span class=line><span class=cl><span class=kr>class</span> <span class=nx>B</span> <span class=kr>extends</span> <span class=nx>A</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nx>arrowOnClick</span> <span class=o>=</span> <span class=p>()</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>super</span><span class=p>.</span><span class=nx>arrowOnClick</span><span class=p>();</span> <span class=c1>// error occurred !!
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s2>&#34;B arrowOnClick&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  <span class=nx>onClick</span><span class=p>(){</span>
+</span></span><span class=line><span class=cl>    <span class=kr>super</span><span class=p>.</span><span class=nx>onClick</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s2>&#34;B onClick&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>B</span><span class=p>.</span><span class=nx>prototype</span><span class=p>);</span> <span class=c1>//B extends A, we get prototype of a
+</span></span></span><span class=line><span class=cl><span class=c1>// A {constructor: ƒ, onClick: ƒ}
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>B</span><span class=p>.</span><span class=nx>prototype</span><span class=p>.</span><span class=nx>__proto__</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=c1>// {constructor: ƒ, onClick: ƒ}
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=k>new</span> <span class=nx>B</span><span class=p>().</span><span class=nx>arrowOnClick</span><span class=p>();</span> <span class=c1>//error occurred!
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>new</span> <span class=nx>B</span><span class=p>().</span><span class=nx>onClick</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>--- console output ---
+</span></span></span><span class=line><span class=cl><span class=cm>A onClick (from line 8)
+</span></span></span><span class=line><span class=cl><span class=cm>B onClick (from line 9)
+</span></span></span><span class=line><span class=cl><span class=cm>*/</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>class</span> <span class=nx>C</span> <span class=kr>extends</span> <span class=nx>A</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nx>arrowOnClick</span><span class=p>()</span> <span class=p>{</span> <span class=c1>// never called!
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kr>super</span><span class=p>.</span><span class=nx>onClick</span><span class=p>();</span> 
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s2>&#34;C onClick&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>C</span><span class=p>.</span><span class=nx>prototype</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=c1>// A {constructor: ƒ, arrowOnClick: ƒ}
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>C</span><span class=p>.</span><span class=nx>prototype</span><span class=p>.</span><span class=nx>__proto__</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=c1>// {constructor: ƒ, onClick: ƒ}
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=k>new</span> <span class=nx>C</span><span class=p>().</span><span class=nx>arrowOnClick</span><span class=p>();</span> <span class=c1>//&#39;new C()&#39; 會執行 A 的 constructor !
+</span></span></span><span class=line><span class=cl><span class=c1>// A arrowOnClick
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>class</span> <span class=nx>D</span> <span class=kr>extends</span> <span class=nx>A</span> <span class=p>{}</span> 
+</span></span><span class=line><span class=cl><span class=k>new</span> <span class=nx>D</span><span class=p>().</span><span class=nx>arrowOnClick</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=c1>// A arrowOnClick
+</span></span></span></code></pre></td></tr></table></div></div><p>記錄一下。</p></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新於 2023-05-25</span></div></div><div class=post-info-line><div class=post-info-md></div><div class=post-info-share><span><a href=javascript:void(0); title="分享到 Twitter" data-sharer=twitter data-url=https://droyuki.github.io/2019/09/js-extends-class-property/ data-title="JS 繼承(1): class property跑去哪了？" data-hashtags=js><i class="fab fa-twitter fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Facebook" data-sharer=facebook data-url=https://droyuki.github.io/2019/09/js-extends-class-property/ data-hashtag=js><i class="fab fa-facebook-square fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Linkedin" data-sharer=linkedin data-url=https://droyuki.github.io/2019/09/js-extends-class-property/><i class="fab fa-linkedin fa-fw" aria-hidden=true></i></a></span></div></div></div><div class=post-info-more><section class=post-tags><i class="fas fa-tags fa-fw" aria-hidden=true></i>&nbsp;<a href=/tags/js/>js</a></section><section><span><a href=javascript:void(0); onclick=window.history.back()>返回</a></span>&nbsp;|&nbsp;<span><a href=/>主頁</a></span></section></div><div class=post-nav><a href=/2019/05/react-bind-this/ class=prev rel=prev title="React.js 到底要在哪 bind this ?"><i class="fas fa-angle-left fa-fw" aria-hidden=true></i>React.js 到底要在哪 bind this ?</a>
 <a href=/2019/09/js-extends-constructor/ class=next rel=next title="JS 繼承(2): constructor 的執行順序">JS 繼承(2): constructor 的執行順序<i class="fas fa-angle-right fa-fw" aria-hidden=true></i></a></div></div><div id=comments><div id=utterances class=comment></div><noscript>Please enable JavaScript to view the comments powered by <a href=https://utteranc.es/>utterances</a>.</noscript></div></article></div></main><footer class=footer><div class=footer-container><div class=footer-line itemscope itemtype=http://schema.org/CreativeWork><i class="far fa-copyright fa-fw" aria-hidden=true></i><span itemprop=copyrightYear>2019 - 2023</span><span class=author itemprop=copyrightHolder>&nbsp;<a href=/ target=_blank>weichen</a></span></div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到頂部><i class="fas fa-arrow-up fa-fw" aria-hidden=true></i>
 </a><a href=# id=view-comments class=fixed-button title=查看評論><i class="fas fa-comment fa-fw" aria-hidden=true></i></a></div><script type=text/javascript src=https://cdn.jsdelivr.net/npm/autocomplete.js@0.38.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://cdn.jsdelivr.net/npm/algoliasearch@4.13.1/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js></script><script type=text/javascript src=https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js></script><script type=text/javascript src=https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js></script><script type=text/javascript>window.config={code:{copyTitle:"複製到剪貼板",maxShownLines:50},comment:{utterances:{darkTheme:"github-dark",issueTerm:"pathname",label:"💬",lightTheme:"github-light",repo:"droyuki/droyuki.github.io"}},search:{algoliaAppID:"",algoliaIndex:"algolia_index",algoliaSearchKey:"algolia_search_only_key",highlightTag:"em",maxResultLength:10,noResultsFound:"沒有找到結果",snippetLength:30,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script><script type=text/javascript>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4FB17VHDQ7",{anonymize_ip:!0})</script><script type=text/javascript src="https://www.googletagmanager.com/gtag/js?id=G-4FB17VHDQ7" async></script></body></html>
